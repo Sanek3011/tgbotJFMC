@@ -22,22 +22,16 @@ public class GetReportByUsernameAndDate implements CommandHandler {
     }
 
     @Override
-    public void handle(Update update) {
+    public void handle(Update update, User user) {
         Long chatId = null;
         CallbackQuery callbackQuery = update.getCallbackQuery();
         if (callbackQuery != null) {
             chatId = callbackQuery.getMessage().getChatId();
-            User user = userService.getUserByTgId(chatId);
             userService.updateUserState(user, State.WAITING_NICKDATA);
             bot.sendMessageToUser(chatId, "Введите ник и кол-во дней, за которые хотите отчет ПРИМЕР: Nick_Name 7");
         }else{
             chatId = update.getMessage().getChatId();
-            User user = userService.getUserByTgId(chatId);
             String text = update.getMessage().getText();
-            if ("quit".equals(text)) {
-                userService.updateUserState(user, State.NO);
-                return;
-            }
             String[] tmp = text.split(" ");
             if (tmp.length != 2) {
                 bot.sendMessageToUser(chatId, "Некорректный ввод. Введите по форме - Nick_Name 7, где 7 - количество дней за который вам нужен список отчетов");

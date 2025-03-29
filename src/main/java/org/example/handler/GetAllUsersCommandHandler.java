@@ -21,15 +21,15 @@ public class GetAllUsersCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handle(Update update) {
+    public void handle(Update update, User user) {
         List<User> allUsers = service.getAllUsers();
 
         Long chatId = update.getCallbackQuery().getMessage().getChatId();
 
         StringBuilder messageText = new StringBuilder();
 
-        for (User user : allUsers) {
-            messageText.append(user.getName()+" "+user.getRole()).append("\n");
+        for (User usertmp : allUsers) {
+            messageText.append(usertmp.getName()+" "+usertmp.getRole()).append("\n");
         }
 
         bot.sendMessageToUser(chatId, messageText.toString());

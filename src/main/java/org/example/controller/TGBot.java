@@ -39,6 +39,7 @@ public class TGBot extends TelegramLongPollingBot {
         commandHandlers.put("getAllReports", new GetAllReportsCommandHandler(this));
         commandHandlers.put("getReportsByUsernameAndDate", new GetReportByUsernameAndDate(this));
         commandHandlers.put("deleteUser", new DeleteUserCommandHandler(this));
+        commandHandlers.put("changeRole", new ChangeRoleCommandHandler(this));
     }
 
     private void registerCommands() {
@@ -65,69 +66,85 @@ public class TGBot extends TelegramLongPollingBot {
         }
     }
 
-    @Override
-    public void onUpdateReceived(Update update) {
+    public void textHandler(Update update) {
+        Message message = update.getMessage();
+        String text = message.getText();
+        Long chatId = message.getChatId();
+        User user = service.getUserByTgId(chatId);
 
-
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            Message message = update.getMessage();
-            String text = message.getText();
-            Long chatId = message.getChatId();
-
-            User user = service.getUserByTgId(chatId);
-
-
-            if (user == null || "/start".equals(text)) {
-                CommandHandler commandHandler = commandHandlers.get("registration");
-                if (commandHandler != null) {
-                    commandHandler.handle(update);
-                }
-            }
-            if (text.startsWith("/delete") && user.getRole().equals(Role.ADMIN)) {
-
-            }
-            if (user.getState().equals(State.WAITING_NICKDATA)){
-                CommandHandler commandHandler = commandHandlers.get("getReportsByUsernameAndDate");
-                commandHandler.handle(update);
-            }
-
-            if (user.getState().equals(State.DESCRIPTION_DONE)||
-                user.getState().equals(State.TYPE_DONE)||
-                user.getState().equals(State.IMG_DONE)) {
-                CommandHandler commandHandler = commandHandlers.get("createReport");
-                commandHandler.handle(update);
-            }
-
-
-            if ("/keyboard".equals(text)) {
-                InlineKeyboardMarkup keyboardMarkup = KeyboardUtil.getKeyboardMarkup(user);
-                sendKeyboard(chatId, keyboardMarkup);
-
-            }
-
-            if (text.startsWith("/nickname")) {
-                String[] mass = text.split(" ");
-                service.updateUsername(chatId, mass[1]);
-                sendMessageToUser(chatId, "Никнейм успешно установлен");
+        if (user == null || "/start".equals(text)) {
+            CommandHandler commandHandler = commandHandlers.get("registration");
+            if (commandHandler != null) {
+                commandHandler.handle(update, user);
             }
         }
+        if ("quit".equals(text)) {
+            service.updateUserState(user, State.NO);
+        }
+        handleState(update, user);
+
+        if ("/keyboard".equals(text)) {
+            InlineKeyboardMarkup keyboardMarkup = KeyboardUtil.getKeyboardMarkup(user);
+            sendKeyboard(chatId, keyboardMarkup);
+
+        }
+
+        if (text.startsWith("/nickname")) {
+            String[] mass = text.split(" ");
+            service.updateUsername(chatId, mass[1]);
+            sendMessageToUser(chatId, "Никнейм успешно установлен");
+        }
+    }
+
+    public void handleState(Update update, User user) {
+        switch (user.getState()) {
+            case WAITING_NICKDATA:
+                commandHandlers.get("getReportsByUsernameAndDate").handle(update,user);
+                break;
+            case TYPE_DONE:
+            case DESCRIPTION_DONE:
+            case IMG_DONE:
+                commandHandlers.get("createReport").handle(update, user);
+                break;
+            case WAITING_DELETE:
+                commandHandlers.get("deleteUser").handle(update, user);
+                break;
+            case WAITING_CHANGEROLE:
+                commandHandlers.get("changeRole").handle(update, user);
+            default:
+                break;
+
+
+        }
+    }
+
+    @Override
+    public void onUpdateReceived(Update update) {
+        User user;
+
+        if (update.hasMessage() && update.getMessage().hasText()) {
+            textHandler(update);
+
+        }
         if (update.hasCallbackQuery()) {
-            callbackQuery(update);
+            Long chatId = update.getCallbackQuery().getMessage().getChatId();
+            user = service.getUserByTgId(chatId);
+            callbackQuery(update, user);
         }
 
     }
 
-    private void callbackQuery(Update update) {
+    private void callbackQuery(Update update, User user) {
         CallbackQuery callbackQuery = update.getCallbackQuery();
         String data = callbackQuery.getData();
         System.out.println(data);
         if (data.startsWith("REPORT_TYPE")) {
             CommandHandler commandHandler = commandHandlers.get("createReport");
-            commandHandler.handle(update);
+            commandHandler.handle(update, user);
         }
         CommandHandler commandHandler = commandHandlers.get(data);
         if (commandHandler != null) {
-            commandHandler.handle(update);
+            commandHandler.handle(update, user);
         }
 
     }

@@ -21,16 +21,14 @@ public class RegistrationCommandHandler implements CommandHandler{
     }
 
     @Override
-    public void handle(Update update) {
+    public void handle(Update update, User user) {
 
         Long chatId = update.getMessage().getChatId();
 
         System.out.println(chatId);
 
-        User userByTgId = service.getUserByTgId(chatId);
 
-
-        if (userByTgId == null) {
+        if (user == null) {
             User newUser = User.builder()
                     .telegramId(chatId)
                     .role(Role.GUEST)

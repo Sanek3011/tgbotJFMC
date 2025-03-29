@@ -21,14 +21,13 @@ public class GetMyReportsCommandHandler implements CommandHandler{
     }
 
     @Override
-    public void handle(Update update) {
+    public void handle(Update update, User user) {
         Long chatId = update.getCallbackQuery().getMessage().getChatId();
-        User user = userService.getUserByTgId(chatId);
         List<ReportDto> allReportByUser = ReportDto.toDtoList(service.getAllReportByUser(user));
         StringBuilder sb = new StringBuilder();
         for (ReportDto report : allReportByUser) {
             sb.append(report);
-            sb.append("---------------------");
+            sb.append("---------------------\n");
         }
         bot.sendMessageToUser(chatId, sb.toString());
 

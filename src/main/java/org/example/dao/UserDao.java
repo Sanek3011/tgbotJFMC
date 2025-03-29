@@ -1,5 +1,7 @@
 package org.example.dao;
 
+import org.example.model.Role;
+import org.example.model.State;
 import org.example.model.User;
 import org.example.util.Factory;
 import org.hibernate.Session;
@@ -21,6 +23,25 @@ public class UserDao implements Dao<User> {
             transaction.commit();
         } catch (Exception e) {
             throw new RuntimeException("Ошибка при удалении");
+
+        }
+    }
+    public Integer deleteByUsername(String username) {
+        try (Session session = FACTORY.openSession()) {
+            Transaction transaction = session.beginTransaction();
+            Query query = session.createQuery("delete from User where name = :name");
+            query.setParameter("name", username);
+            Integer result = query.executeUpdate();
+            transaction.commit();
+            return result;
+        }
+    }
+    public void changeRoleByUser(User user, Role role) {
+        try (Session session = FACTORY.openSession()) {
+            Transaction transaction = session.beginTransaction();
+            user.setRole(role);
+            session.merge(user);
+            transaction.commit();
 
         }
     }

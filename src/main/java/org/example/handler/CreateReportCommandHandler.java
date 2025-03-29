@@ -25,7 +25,7 @@ public class CreateReportCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handle(Update update) {
+    public void handle(Update update, User user) {
         Long chatId = null;
         CallbackQuery callbackQuery = update.getCallbackQuery();// сюда не приходит айдишник в случае ТЕКСТА
 
@@ -37,26 +37,24 @@ public class CreateReportCommandHandler implements CommandHandler {
 
         System.out.println(chatId);
 
-        User userByTgId = userService.getUserByTgId(chatId);
-
         tmp.putIfAbsent(chatId, new ReportSession());
 
         ReportSession reportSession = tmp.get(chatId);
         System.out.println("ReportSession before: " + reportSession);
 
 
-        switch (userByTgId.getState()) {
+        switch (user.getState()) {
             case NO:
-                getTypeOfReport(chatId, userByTgId);
+                getTypeOfReport(chatId, user);
                 break;
             case TYPE_DONE:
-                getDescOfReport(update, reportSession, chatId, userByTgId);
+                getDescOfReport(update, reportSession, chatId, user);
                 break;
             case DESCRIPTION_DONE:
-                getImgOfReport(update, reportSession, userByTgId, chatId);
+                getImgOfReport(update, reportSession, user, chatId);
                 break;
             case IMG_DONE:
-                createAndSave(update, reportSession, userByTgId, chatId);
+                createAndSave(update, reportSession, user, chatId);
                 break;
         }
     }
