@@ -29,7 +29,7 @@ public class GetAllUsersCommandHandler implements CommandHandler {
         StringBuilder messageText = new StringBuilder();
 
         for (User user : allUsers) {
-            messageText.append(user.getName()).append("\n");
+            messageText.append(user.getName()+" "+user.getRole()).append("\n");
         }
 
         bot.sendMessageToUser(chatId, messageText.toString());

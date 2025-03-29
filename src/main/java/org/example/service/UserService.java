@@ -39,4 +39,7 @@ public class UserService {
     }
 
 
+    public User getUserByName(String userName) throws Exception {
+        return dao.getUserByUsername(userName);
+    }
 }

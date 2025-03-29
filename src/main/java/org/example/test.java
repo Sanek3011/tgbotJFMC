@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.dao.ReportDao;
 import org.example.dao.UserDao;
 import org.example.dto.ReportDto;
 import org.example.model.Report;
@@ -10,11 +11,12 @@ import org.example.util.Factory;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
+import java.util.List;
+
 public class test {
     public static void main(String[] args) {
-        UserDao dao = new UserDao();
-
-        User userByTgId = dao.getUserByTgId(129332L);
-        System.out.println(userByTgId);
+        ReportDao dao = new ReportDao();
+        List<Report> all = dao.getAll();
+        System.out.println(all.get(0));
     }
 }

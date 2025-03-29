@@ -19,7 +19,7 @@ public class KeyboardUtil {
                     createButton("Список моих отчетов", "getMyReports")),
             Role.ADMIN, List.of(createButton("Список пользователей", "getAllUsers"),
                     createButton("Все отчеты", "getAllReports"),
-                    createButton("Поиск отчета по нику", "findReportByName"),
+                    createButton("Поиск отчета по нику", "getReportsByUsernameAndDate"),
                     createButton("Удалить пользователя", "deleteUser"),
                     createButton("Изменить роль пользователю", "changeRole"))
     );

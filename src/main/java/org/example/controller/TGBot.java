@@ -35,12 +35,17 @@ public class TGBot extends TelegramLongPollingBot {
         commandHandlers.put("registration", new RegistrationCommandHandler(this));
         commandHandlers.put("getMyReports", new GetMyReportsCommandHandler(this));
         commandHandlers.put("createReport", new CreateReportCommandHandler(this));
+        commandHandlers.put("info", new InfoCommandHandler(this));
+        commandHandlers.put("getAllReports", new GetAllReportsCommandHandler(this));
+        commandHandlers.put("getReportsByUsernameAndDate", new GetReportByUsernameAndDate(this));
+        commandHandlers.put("deleteUser", new DeleteUserCommandHandler(this));
     }
 
     private void registerCommands() {
         List<BotCommand> commands = new ArrayList<>();
         commands.add(new BotCommand("/keyboard", "Показать действия"));
         commands.add(new BotCommand("/nickname", "Установить имя"));
+
 
         try {
             this.execute(new SetMyCommands(commands, null, null));
@@ -78,8 +83,17 @@ public class TGBot extends TelegramLongPollingBot {
                     commandHandler.handle(update);
                 }
             }
+            if (text.startsWith("/delete") && user.getRole().equals(Role.ADMIN)) {
 
-            if (!user.getState().equals(State.NO)) {
+            }
+            if (user.getState().equals(State.WAITING_NICKDATA)){
+                CommandHandler commandHandler = commandHandlers.get("getReportsByUsernameAndDate");
+                commandHandler.handle(update);
+            }
+
+            if (user.getState().equals(State.DESCRIPTION_DONE)||
+                user.getState().equals(State.TYPE_DONE)||
+                user.getState().equals(State.IMG_DONE)) {
                 CommandHandler commandHandler = commandHandlers.get("createReport");
                 commandHandler.handle(update);
             }
@@ -106,6 +120,7 @@ public class TGBot extends TelegramLongPollingBot {
     private void callbackQuery(Update update) {
         CallbackQuery callbackQuery = update.getCallbackQuery();
         String data = callbackQuery.getData();
+        System.out.println(data);
         if (data.startsWith("REPORT_TYPE")) {
             CommandHandler commandHandler = commandHandlers.get("createReport");
             commandHandler.handle(update);

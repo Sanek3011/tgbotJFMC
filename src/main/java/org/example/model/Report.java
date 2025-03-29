@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 @Data
@@ -30,6 +31,14 @@ public class Report {
     @ManyToOne
     @JoinColumn(name = "user_id")
     User user;
+
+
+    @Override
+    public String toString() {
+        String dateStr = dateOfCreation.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        return String.format("Автор отчета: %s\nТип отчета: %s\nОписание: %s\nСкрин: %s\nДата загрузки: %s\n-------------------\n",
+                user.getName(), getType(), getDesc(), getImageURL(), getDateOfCreation());
+    }
 
     @Override
     public boolean equals(Object o) {

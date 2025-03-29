@@ -77,4 +77,12 @@ public class UserDao implements Dao<User> {
             throw new RuntimeException("Ошибка при обновлении");
         }
     }
+
+    public User getUserByUsername(String userName) throws Exception {
+        try (Session session = FACTORY.openSession()) {
+            Query<User> query = session.createQuery("from User where name = :name", User.class);
+            query.setParameter("name",userName);
+            return query.getSingleResult();
+        }
+    }
 }

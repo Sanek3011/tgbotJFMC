@@ -76,11 +76,12 @@ public class ReportDao implements Dao<Report> {
         }
     }
 
-    public List<Report> getAllReportByUserAndDate(Long id, LocalDate date) {
+    public List<Report> getAllReportByUsernameAndDate(String userName, LocalDate date) {
         try (Session session = FACTORY.openSession()) {
-            Query<Report> query = session.createQuery("from Report where user.id = :id and dateOfCreation = :date", Report.class);
-            query.setParameter("id", id);
+            Query<Report> query = session.createQuery("from Report where user.name = :username and dateOfCreation between :date and :date2", Report.class);
+            query.setParameter("username", userName);
             query.setParameter("date", date);
+            query.setParameter("date2", LocalDate.now());
             return query.list();
         }catch (Exception e) {
             return new ArrayList<>();
