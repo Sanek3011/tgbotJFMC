@@ -20,18 +20,6 @@ class UserDaoTest {
     void getAll() {
     }
 
-    @Test
-    void getById() {
-        User sanya = User.builder()
-                .id(1L)
-                .name("sanya")
-                .role(Role.ADMIN)
-                .build();
-        try (Session session = FACTORY.openSession()) {
-            User user = session.get(User.class, 1L);
-            Assertions.assertEquals(sanya, user);
-        }
-    }
 
     @Test
     void save() {

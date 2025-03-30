@@ -24,6 +24,10 @@ public class GetMyReportsCommandHandler implements CommandHandler{
     public void handle(Update update, User user) {
         Long chatId = update.getCallbackQuery().getMessage().getChatId();
         List<ReportDto> allReportByUser = ReportDto.toDtoList(service.getAllReportByUser(user));
+        if (allReportByUser.isEmpty()) {
+            bot.sendMessageToUser(chatId, "Отчеты не найдены");
+            return;
+        }
         StringBuilder sb = new StringBuilder();
         for (ReportDto report : allReportByUser) {
             sb.append(report);

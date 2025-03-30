@@ -36,15 +36,6 @@ public class UserDao implements Dao<User> {
             return result;
         }
     }
-    public void changeRoleByUser(User user, Role role) {
-        try (Session session = FACTORY.openSession()) {
-            Transaction transaction = session.beginTransaction();
-            user.setRole(role);
-            session.merge(user);
-            transaction.commit();
-
-        }
-    }
 
     public User getUserByTgId(Long id) {
         try (Session session = FACTORY.openSession()) {

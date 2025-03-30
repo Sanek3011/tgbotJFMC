@@ -34,7 +34,6 @@ public class UserService {
 
     }
     public void updateUserState(User user, State state){
-//        User userByTgId = getUserByTgId(chatId);
         user.setState(state);
         dao.update(user);
     }
@@ -51,7 +50,8 @@ public class UserService {
     public void changeRoleByUsername(User user, String role) throws IllegalArgumentException {
 
             Role roles = Role.valueOf(role.toUpperCase());
-            dao.changeRoleByUser(user, roles);
+            user.setRole(roles);
+            dao.update(user);
 
 
 
