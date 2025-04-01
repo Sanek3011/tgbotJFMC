@@ -36,8 +36,8 @@ public class Report {
     @Override
     public String toString() {
         String dateStr = dateOfCreation.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
-        return String.format("Автор отчета: %s\nТип отчета: %s\nОписание: %s\nСкрин: %s\nДата загрузки: %s\n-------------------\n",
-                user.getName(), getType(), getDesc(), getImageURL(), getDateOfCreation());
+        return String.format("ID отчета:\n %d Автор отчета: %s\nТип отчета: %s\nОписание: %s\nСкрин: %s\nДата загрузки: %s\n-------------------\n",
+                getId(), user.getName(), getType(), getDesc(), getImageURL(), getDateOfCreation());
     }
 
     @Override

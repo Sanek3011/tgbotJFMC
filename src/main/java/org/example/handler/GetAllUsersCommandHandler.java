@@ -1,5 +1,6 @@
 package org.example.handler;
 import org.example.controller.TGBot;
+import org.example.model.Role;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -22,6 +23,9 @@ public class GetAllUsersCommandHandler implements CommandHandler {
 
     @Override
     public void handle(Update update, User user) {
+        if (!user.getRole().equals(Role.ADMIN)) {
+            return;
+        }
         List<User> allUsers = service.getAllUsers();
 
         Long chatId = update.getCallbackQuery().getMessage().getChatId();

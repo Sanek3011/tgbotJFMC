@@ -2,6 +2,7 @@ package org.example.handler;
 
 import org.example.controller.TGBot;
 import org.example.model.Report;
+import org.example.model.Role;
 import org.example.model.State;
 import org.example.model.User;
 import org.example.service.ReportService;
@@ -23,6 +24,9 @@ public class GetReportByUsernameAndDate implements CommandHandler {
 
     @Override
     public void handle(Update update, User user) {
+        if (!user.getRole().equals(Role.ADMIN)) {
+            return;
+        }
         Long chatId = null;
         CallbackQuery callbackQuery = update.getCallbackQuery();
         if (callbackQuery != null) {

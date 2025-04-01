@@ -15,13 +15,10 @@ import java.util.List;
 public class test {
     public static void main(String[] args) {
 
-        try (Session session = Factory.FACTORY.openSession()) {
-            User user = session.get(User.class, 12L);
-            UserService service = new UserService();
-            service.changeRoleByUsername(user, "sadsad");
-        } catch (IllegalArgumentException e) {
-            System.out.println("ашипка");
-        }
+        String input = "minus1";
+        String[] parts = input.split("(?<=\\D)(?=\\d)"); // Разделяет между знаком и цифрой
+        System.out.println("Знак: " + parts[0]);
+        System.out.println("Число: " + parts[1]);
 
     }
 }

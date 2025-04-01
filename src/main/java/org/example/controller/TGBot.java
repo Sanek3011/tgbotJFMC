@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.handler.*;
 import org.example.model.Role;
 import org.example.model.State;
@@ -21,11 +22,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+@Slf4j
 public class TGBot extends TelegramLongPollingBot {
 
-    private static final String BOT_TOKEN = "7918103842:AAH6fYagCHDh9j_8XHiScMVQHQSb9uwJq50";
-    private static final String BOT_NAME = "JFMC05";
+    private static final String BOT_TOKEN = "7750335900:AAEUTOVDgzV4NlnYswiw2k_35lGPVuW3F2w";
+    private static final String BOT_NAME = "JFMCTest";
     private final UserService service = new UserService();
     private final Map<String, CommandHandler> commandHandlers = new HashMap<>();
 
@@ -40,6 +41,9 @@ public class TGBot extends TelegramLongPollingBot {
         commandHandlers.put("getReportsByUsernameAndDate", new GetReportByUsernameAndDate(this));
         commandHandlers.put("deleteUser", new DeleteUserCommandHandler(this));
         commandHandlers.put("changeRole", new ChangeRoleCommandHandler(this));
+        commandHandlers.put("sendAll", new SendAllCommandHandler(this));
+        commandHandlers.put("modifyScore", new ModifyScoreCommandHandler(this));
+
     }
 
     private void registerCommands() {
@@ -52,10 +56,12 @@ public class TGBot extends TelegramLongPollingBot {
             this.execute(new SetMyCommands(commands, null, null));
         }catch (TelegramApiException e) {
             e.printStackTrace();
+            log.warn("Команды не зарегистрированы. registerCommands()");
         }
     }
 
     public void sendMessageToUser(Long chatId, String text) {
+        log.info("Отправка сообщения к {}", chatId);
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText(text);
@@ -63,6 +69,7 @@ public class TGBot extends TelegramLongPollingBot {
             execute(message);
         } catch (TelegramApiException e) {
             e.printStackTrace();
+            log.warn("Отправка сообщения не удалась к {}", chatId);
         }
     }
 
@@ -71,6 +78,8 @@ public class TGBot extends TelegramLongPollingBot {
         String text = message.getText();
         Long chatId = message.getChatId();
         User user = service.getUserByTgId(chatId);
+        log.info("Получено сообщение от пользователя {}: {}", chatId, text);
+
 
         if (user == null || "/start".equals(text)) {
             CommandHandler commandHandler = commandHandlers.get("registration");
@@ -81,11 +90,12 @@ public class TGBot extends TelegramLongPollingBot {
         if ("quit".equals(text)) {
             service.updateUserState(user, State.NO);
         }
-        handleState(update, user);
+
 
         if ("/keyboard".equals(text)) {
-            InlineKeyboardMarkup keyboardMarkup = KeyboardUtil.getKeyboardMarkup(user);
+            InlineKeyboardMarkup keyboardMarkup = KeyboardUtil.getKeyboardMarkup(user, false);
             sendKeyboard(chatId, keyboardMarkup);
+            log.info("Клавиатура НЕ админ отправлена к {}", chatId);
 
         }
 
@@ -94,6 +104,7 @@ public class TGBot extends TelegramLongPollingBot {
             service.updateUsername(chatId, mass[1]);
             sendMessageToUser(chatId, "Никнейм успешно установлен");
         }
+        handleState(update, user);
     }
 
     public void handleState(Update update, User user) {
@@ -111,6 +122,13 @@ public class TGBot extends TelegramLongPollingBot {
                 break;
             case WAITING_CHANGEROLE:
                 commandHandlers.get("changeRole").handle(update, user);
+                break;
+            case WAITING_SENDALL:
+                commandHandlers.get("sendAll").handle(update, user);
+                break;
+            case WAITING_NICKSCORE:
+                commandHandlers.get("modifyScore").handle(update, user);
+                break;
             default:
                 break;
 
@@ -122,22 +140,44 @@ public class TGBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         User user;
 
+
+
         if (update.hasMessage() && update.getMessage().hasText()) {
             textHandler(update);
 
         }
+
         if (update.hasCallbackQuery()) {
             Long chatId = update.getCallbackQuery().getMessage().getChatId();
             user = service.getUserByTgId(chatId);
-            callbackQuery(update, user);
+            callbackQuery(update, user, chatId);
         }
 
     }
 
-    private void callbackQuery(Update update, User user) {
+    private void callbackQuery(Update update, User user, Long chatId) {
         CallbackQuery callbackQuery = update.getCallbackQuery();
         String data = callbackQuery.getData();
-        System.out.println(data);
+
+        log.info("Получена команда от пользователя {}: {}", chatId, data);
+        if (data.equals("adminPanel")) {
+            InlineKeyboardMarkup keyboardMarkup = KeyboardUtil.getKeyboardMarkup(user, true);
+            sendKeyboard(chatId, keyboardMarkup);
+            log.info("Отправлена админ-клавиатура к {}", chatId);
+        }
+        if (data.equals("backToMain")) {
+            InlineKeyboardMarkup keyboardMarkup = KeyboardUtil.getKeyboardMarkup(user, false);
+            sendKeyboard(chatId, keyboardMarkup);
+            log.info("Клавиатура НЕ админ отправлена к {}", chatId);
+
+        }
+        if (data.equals("minus1")
+            || data.equals("plus1")
+            || data.equals("plus3")
+            || data.equals("minus3")) {
+            CommandHandler commandHandler = commandHandlers.get("modifyScore");
+            commandHandler.handle(update, user);
+        }
         if (data.startsWith("REPORT_TYPE")) {
             CommandHandler commandHandler = commandHandlers.get("createReport");
             commandHandler.handle(update, user);
@@ -160,6 +200,7 @@ public class TGBot extends TelegramLongPollingBot {
             execute(sendMessage);
         } catch (TelegramApiException e) {
             e.printStackTrace();
+            log.warn("Ошибка при отправке клавиатуры");
         }
     }
 

@@ -1,14 +1,6 @@
 package org.example;
 
 import org.example.controller.TGBot;
-import org.example.dao.ReportDao;
-import org.example.model.Report;
-import org.example.model.ReportType;
-import org.example.model.User;
-import org.example.util.Factory;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.query.Query;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;

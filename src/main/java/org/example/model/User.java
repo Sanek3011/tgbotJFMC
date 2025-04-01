@@ -25,7 +25,7 @@ public class User {
     Long telegramId;
     @Enumerated(EnumType.STRING)
     Role role;
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     List<Report> reports;
     @Column(name = "score")
     Integer score;

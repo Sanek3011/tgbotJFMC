@@ -1,5 +1,6 @@
 package org.example.dao;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.model.Report;
 import org.example.util.Factory;
 import org.hibernate.Session;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.example.util.Factory.FACTORY;
-
+@Slf4j
 public class ReportDao implements Dao<Report> {
     @Override
     public void delete(Long id) {
@@ -21,6 +22,7 @@ public class ReportDao implements Dao<Report> {
             session.remove(report);
             transaction.commit();
         }catch (Exception e) {
+            log.warn("Ошибка при удалении отчета с {}", id);
             throw new RuntimeException("Ошибка при удалении");
         }
     }
@@ -40,6 +42,7 @@ public class ReportDao implements Dao<Report> {
         try (Session session = FACTORY.openSession()) {
             return session.get(Report.class, id);
         } catch (Exception e) {
+            log.warn("Ошибка при получении отчета с {}", id);
             throw new RuntimeException("Ошибка при получении");
         }
     }
@@ -51,7 +54,14 @@ public class ReportDao implements Dao<Report> {
             session.persist(entity);
             transaction.commit();
         }catch (Exception e) {
+            log.warn("Ошибка при сохранении отчета с id {} desc {} type {} img {} date {}",
+                    entity.getId() != null ? entity.getId() : "N/A",
+                    entity.getDesc() != null ? entity.getDesc() : "N/A",
+                    entity.getType() != null ? entity.getType() : "N/A",
+                    entity.getImageURL() != null ? entity.getImageURL() : "N/A",
+                    entity.getDateOfCreation() != null ? entity.getDateOfCreation() : "N/A");
             throw new RuntimeException("Ошибка при сохранении");
+
         }
     }
 
@@ -62,6 +72,12 @@ public class ReportDao implements Dao<Report> {
             session.merge(entity);
             transaction.commit();
         }catch (Exception e) {
+            log.warn("Ошибка при редактировании отчета с id {} desc {} type {} img {} date {}",
+                    entity.getId() != null ? entity.getId() : "N/A",
+                    entity.getDesc() != null ? entity.getDesc() : "N/A",
+                    entity.getType() != null ? entity.getType() : "N/A",
+                    entity.getImageURL() != null ? entity.getImageURL() : "N/A",
+                    entity.getDateOfCreation() != null ? entity.getDateOfCreation() : "N/A");
             throw new RuntimeException("Ошибка при редактировании");
         }
 

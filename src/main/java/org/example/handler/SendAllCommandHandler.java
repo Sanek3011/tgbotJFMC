@@ -8,11 +8,13 @@ import org.example.service.UserService;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-public class DeleteUserCommandHandler implements CommandHandler {
-    private TGBot bot;
-    private UserService service = new UserService();
+import java.util.List;
 
-    public DeleteUserCommandHandler(TGBot bot) {
+public class SendAllCommandHandler implements CommandHandler{
+    private final TGBot bot;
+    private final UserService service = new UserService();
+
+    public SendAllCommandHandler(TGBot bot) {
         this.bot = bot;
     }
 
@@ -21,18 +23,25 @@ public class DeleteUserCommandHandler implements CommandHandler {
         if (!user.getRole().equals(Role.ADMIN)) {
             return;
         }
-        Long chatId = null;
         CallbackQuery callbackQuery = update.getCallbackQuery();
+        Long chatId;
+        if (!user.getRole().equals(Role.ADMIN)) {
+            return;
+        }
         if (callbackQuery != null) {
             chatId = callbackQuery.getMessage().getChatId();
-            service.updateUserState(user, State.WAITING_DELETE);
-            bot.sendMessageToUser(chatId, "Введите ник пользователя, которого хотите удалить");
+            service.updateUserState(user, State.WAITING_SENDALL);
+            bot.sendMessageToUser(chatId, "Введите сообщение для рассылки");
         }else{
             chatId = update.getMessage().getChatId();
             String text = update.getMessage().getText();
-            Integer i = service.deleteUser(text);
+            List<Long> allUsersTgId = service.getAllUsersTgId();
+            allUsersTgId.remove(chatId);
+            for (Long l : allUsersTgId) {
+                bot.sendMessageToUser(l, text);
+            }
+            bot.sendMessageToUser(chatId, "Успешно отправлено");
             service.updateUserState(user, State.NO);
-            bot.sendMessageToUser(chatId, i+" пользователей успешно удалено");
         }
 
     }

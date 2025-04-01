@@ -2,6 +2,7 @@ package org.example.handler;
 
 import org.example.controller.TGBot;
 import org.example.model.Report;
+import org.example.model.Role;
 import org.example.model.User;
 import org.example.service.ReportService;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -18,8 +19,15 @@ public class GetAllReportsCommandHandler implements CommandHandler {
 
     @Override
     public void handle(Update update, User user) {
+        if (!user.getRole().equals(Role.ADMIN)) {
+            return;
+        }
         Long chatId = update.getCallbackQuery().getMessage().getChatId();
         List<Report> allReports = service.getAllReports();
+        if (allReports.isEmpty()) {
+            bot.sendMessageToUser(chatId, "Отчетов не найдено");
+            return;
+        }
         StringBuilder sb = new StringBuilder();
         for (Report report : allReports) {
             sb.append(report);

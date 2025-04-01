@@ -39,8 +39,12 @@ public class UserService {
     }
 
 
-    public User getUserByName(String userName) throws Exception {
-        return dao.getUserByUsername(userName);
+    public User getUserByName(String userName)  {
+        try {
+            return dao.getUserByUsername(userName);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public Integer deleteUser(String username) {
@@ -50,11 +54,33 @@ public class UserService {
     public void changeRoleByUsername(User user, String role) throws IllegalArgumentException {
 
             Role roles = Role.valueOf(role.toUpperCase());
+        System.out.println("----> полученная роль"+roles);
             user.setRole(roles);
+        System.out.println(user.getRole()+"<------ Установленная роль");
             dao.update(user);
+    }
+    public List<Long> getAllUsersTgId() {
+        return dao.getAllTgIdUsers();
 
+    }
 
-
-
+    public void updateUserScore(User user, String op, String num) {
+        Integer score = user.getScore();
+        int number = Integer.parseInt(num);
+        switch (op) {
+            case "plus":
+                user.setScore(score+number);
+                dao.update(user);
+                break;
+            case "minus":
+                user.setScore(score-number);
+                if (user.getScore() < 0) {
+                    user.setScore(0);
+                }
+                dao.update(user);
+                break;
+            default:
+                throw new IllegalStateException();
+        }
     }
 }

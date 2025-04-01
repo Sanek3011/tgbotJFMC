@@ -28,7 +28,9 @@ public class CreateReportCommandHandler implements CommandHandler {
     public void handle(Update update, User user) {
         Long chatId = null;
         CallbackQuery callbackQuery = update.getCallbackQuery();// сюда не приходит айдишник в случае ТЕКСТА
-
+        if (user.getRole().equals(Role.GUEST)){
+            return;
+        }
         if (callbackQuery == null) {
             chatId = update.getMessage().getChatId();
         }else{
@@ -68,6 +70,7 @@ public class CreateReportCommandHandler implements CommandHandler {
         report.setUser(userByTgId);
         reportService.saveReport(report);
         bot.sendMessageToUser(chatId, "Ваш отчет успешно отправлен");
+        tmp.clear();
     }
 
     private void getImgOfReport(Update update, ReportSession reportSession, User userByTgId, Long chatId) {
